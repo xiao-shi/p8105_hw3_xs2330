@@ -18,3 +18,34 @@ brfss = brfss_smart2010 %>%
   filter(topic == "Overall Health") %>%
   mutate(response = as.factor(response))
 ```
+
+** States with 7 locations **
+```{r p1 questions}
+brfss_2002 = filter(brfss, year == 2002) %>%
+  select(locationabbr, locationdesc) %>%
+  distinct() %>%
+  count(locationabbr)
+states_7locs = brfss_2002[which(brfss_2002$n == 7), 1]
+states_7locs
+```
+The above three states have 7 observations
+
+** Spaghetti plot of locations **
+```{r p1 spaghetti plot}
+brfss_obser = select(brfss, year, locationabbr, locationdesc) %>%
+  group_by(year) %>%
+  count(locationabbr)
+ggplot(brfss_obser, aes(x = year, y = n, color = locationabbr)) +
+  geom_line() +
+  labs(
+    title = "Number of Observations in each state from 2002 to 2010",
+    x = "Year",
+    y = "Number of Observations",
+    caption = "Data from the p8105 package"
+  ) +
+  viridis::scale_colour_viridis(
+    name = "locationabbr", 
+    discrete = TRUE
+  ) +
+  theme_set(theme_bw() + theme(legend.position = "right"))
+```
