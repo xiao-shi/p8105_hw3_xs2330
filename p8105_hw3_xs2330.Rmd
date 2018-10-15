@@ -11,7 +11,7 @@ library(p8105.datasets)
 ```
 
 ## Probelm 1
-** Data cleaning **
+**Data cleaning**
 ```{r p1 data cleaning}
 brfss = brfss_smart2010 %>%
   janitor::clean_names() %>%
@@ -19,7 +19,7 @@ brfss = brfss_smart2010 %>%
   mutate(response = as.factor(response))
 ```
 
-** States with 7 locations **
+**States with 7 locations**
 ```{r p1 questions}
 brfss_2002 = filter(brfss, year == 2002) %>%
   select(locationabbr, locationdesc) %>%
@@ -30,7 +30,7 @@ states_7locs
 ```
 The above three states have 7 observations
 
-** Spaghetti plot of locations **
+**Spaghetti plot of locations**
 ```{r p1 spaghetti plot}
 brfss_obser = select(brfss, year, locationabbr, locationdesc) %>%
   group_by(year) %>%
@@ -50,7 +50,7 @@ ggplot(brfss_obser, aes(x = year, y = n, color = locationabbr)) +
   theme_set(theme_bw() + theme(legend.position = "right"))
 ```
 
-** 2002, 2006, 2010 mean table for "Excellent" responses**
+**2002, 2006, 2010 mean table for "Excellent" responses**
 ```{r p1 proportion table}
 prop_table_mean = filter(brfss, year == 2002 | year == 2006 | year == 2010) %>%
   filter(locationabbr == "NY") %>%
@@ -62,7 +62,7 @@ prop_table_mean = filter(brfss, year == 2002 | year == 2006 | year == 2010) %>%
   knitr::kable(digits = 1)
 ```
 
-** 2002, 2006, 2010 sd table for "Excellent" responses**
+**2002, 2006, 2010 sd table for "Excellent" responses**
 ```{r}
 prop_table_sd = filter(brfss, year == 2002 | year == 2006 | year == 2010) %>%
   filter(locationabbr == "NY") %>%
@@ -74,7 +74,7 @@ prop_table_sd = filter(brfss, year == 2002 | year == 2006 | year == 2010) %>%
   knitr::kable(digits = 1)
 ```
 
-** Five-panel plot for each response category over time **
+**Five-panel plot for each response category over time**
 ```{r five panel, warning = FALSE}
 five_panel = select(brfss, year, locationabbr, locationdesc, response, data_value) %>%
   group_by(year, locationabbr, response) %>%
@@ -109,13 +109,13 @@ Make a plot that shows the number of items ordered in each aisle. Order aisles s
 Make a table showing the most popular item aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”
 Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week; format this table for human readers (i.e. produce a 2 x 7 table).
 
-** Number of aisles **
+**Number of aisles**
 ```{r}
 num_aisle = nrow(distinct(inscart, aisle_id))
 ```
 The number of aisle is `r num_aisle`
 
-** items ordered in each aisle **
+**items ordered in each aisle**
 ```{r}
 num_item_aisle = inscart %>%
   count(aisle) %>%
@@ -125,7 +125,7 @@ ggplot(num_item_aisle, aes(x = aisle, y = n)) +
     theme(axis.text.x = element_text(angle = 90))
 ```
 
-** Popular item aisles **
+**Popular item aisles**
 ```{r}
 popular_aisles = filter(inscart, aisle == "baking ingredients" | aisle == "dog food care" | aisle == "packaged vegetables fruits") %>%
   group_by(aisle, product_name) %>%
@@ -143,7 +143,7 @@ knitr::kable(popular_aisles)
 
 Above table shows the most popular item aisles in “baking ingredients”, “dog food care”, and “packaged vegetables fruits”
 
-** Pink Lady Apples and Coffee Ice Cream orders by day **
+**Pink Lady Apples and Coffee Ice Cream orders by day**
 ```{r}
 mean_hour_apple_coffee = select(inscart, order_id, order_dow, order_hour_of_day, product_name) %>%
   mutate(order_dow = factor(order_dow, labels = c("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"))) %>%
@@ -161,7 +161,7 @@ skimr::skim(ny_noaa)
 ```
 The ny noaa data were accessed from the NOAA National Climatic Data Center, consisting of `r nrow(ny_noaa)` rows and `r ncol(ny_noaa)`. Key variables include date by `date`, prcipitation by `prcp`, snowfall by `snow`, depth of snow by `snwd`, highest temparture by `tmax`, and lowest temparture by `tmin`. For `tmax` and `tmin`, `r mean(is.na(ny_noaa$tmax))` of the data is missing, which is a big problem if we are trying to calculate temparature related results because we cannot be sure whether the missing data would lead to a different result.
 
-** data cleaning **
+**data cleaning**
 ```{r p3 data cleaning}
 ny_noaa_cleaned = separate(ny_noaa, date, into = c("year", "month", "day"), sep = "-") %>%
   mutate(tmax = as.integer(tmax)) %>%
@@ -177,8 +177,8 @@ snowmode = getmode(ny_noaa$snow)
 ```
 The most commonly observed value for snowfall is `r snowmode`, because it's  not always winter in NYC
 
-** NYC average maximum temperature in Jan and July **
-```{r, warning=FALSE}
+**NYC average maximum temperature in Jan and July**
+```{r, warning = FALSE}
 tmax_jan_july = select(ny_noaa_cleaned, id, year, month, tmax, tmin) %>%
   filter(month == "01" | month == "07") %>%
   mutate(month = factor(month, labels = c("Jan", "July"))) %>%
@@ -198,3 +198,37 @@ ggplot(tmax_jan_july, aes(x = year, y = mean_tmax, color = month)) +
 ```
 
 From the two-panel plot showing the average temperature in January and in July in each station across years. The average maximum temperature in both January and July fluctuates around a certain level through out 3 decades. Outliers in January are seen on the higher temperature side, and outliers in July are seen on the lower temperature side.
+
+**Max temperature vs. Min temperature in NYC**
+
+two panel plot to show tmax vs tmin for the full dataset
+```{r, warning = FALSE}
+ggplot(ny_noaa_cleaned, aes(x = tmax, y = tmin)) +
+  geom_bin2d() +
+  labs(
+    title = "Max temperature vs. Min temperature in NYC",
+    x = "Max temperature",
+    y = "Min temperature",
+    caption = "Data from the noaa package"
+  )
+```
+
+A heat map was chosen because we are trying to display a lot of matched pairs of data (max temp vs. min temp).
+
+**Snowfall greater than 0 and less than 100 separately by year**
+```{r}
+snow_fall = select(ny_noaa_cleaned, id, month, year, snow) %>%
+  filter(snow > 0 & snow < 100)
+ggplot(snow_fall, aes(x = year, y = snow, fill = "red")) +
+  geom_violin() +
+  labs(
+    title = "Snowfall from 0 to 100 mm in NYC",
+    x = "Year",
+    y = "Average snowfall",
+    caption = "Data from the noaa package"
+  ) +
+  theme(axis.text.x = element_text(angle = 90))
+
+```
+
+A violin graph was chosen because the snowfall is a variable without much change throughout the years. Thus the violin graph is able to show the fact that snowfalls are stable through out the years, but also able to show the tiny difference between years. For example, the year 2010 has a different shape around 37 mm.
