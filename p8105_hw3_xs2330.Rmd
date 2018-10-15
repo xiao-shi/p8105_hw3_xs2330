@@ -173,7 +173,28 @@ getmode <- function(v) {
    uniqv <- unique(v)
    uniqv[which.max(tabulate(match(v, uniqv)))]
 } 
-snow_mode = getmode(ny_noaa$snow)
+snowmode = getmode(ny_noaa$snow)
 ```
-The most commonly observed value for snowfall is `r snow_mode`, because it's  not always winter in NYC
+The most commonly observed value for snowfall is `r snowmode`, because it's  not always winter in NYC
 
+** NYC average maximum temperature in Jan and July **
+```{r, warning=FALSE}
+tmax_jan_july = select(ny_noaa_cleaned, id, year, month, tmax, tmin) %>%
+  filter(month == "01" | month == "07") %>%
+  mutate(month = factor(month, labels = c("Jan", "July"))) %>%
+  group_by(id, year, month) %>% 
+  summarize(mean_tmax = mean(tmax, na.rm = TRUE),
+            mean_tmin = mean(tmin, na.rm = TRUE))
+ggplot(tmax_jan_july, aes(x = year, y = mean_tmax, color = month)) +
+  geom_boxplot() +
+  facet_grid(~month) +
+  theme(axis.text.x = element_text(angle = 90)) +
+  labs(
+    title = "NYC average maximum temperature in Jan and July",
+    x = "Year",
+    y = "Average maximum temperature",
+    caption = "Data from the noaa package"
+  )
+```
+
+From the two-panel plot showing the average temperature in January and in July in each station across years. The average maximum temperature in both January and July fluctuates around a certain level through out 3 decades. Outliers in January are seen on the higher temperature side, and outliers in July are seen on the lower temperature side.
