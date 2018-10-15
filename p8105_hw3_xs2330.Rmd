@@ -49,3 +49,51 @@ ggplot(brfss_obser, aes(x = year, y = n, color = locationabbr)) +
   ) +
   theme_set(theme_bw() + theme(legend.position = "right"))
 ```
+
+** 2002, 2006, 2010 mean table for "Excellent" responses**
+```{r p1 proportion table}
+prop_table_mean = filter(brfss, year == 2002 | year == 2006 | year == 2010) %>%
+  filter(locationabbr == "NY") %>%
+  filter(response == "Excellent") %>%
+  select(year, locationdesc, response, data_value) %>%
+  group_by(year) %>%
+  summarize(mean_excellent = mean(data_value)) %>% 
+  spread(key = year, value = mean_excellent) %>% 
+  knitr::kable(digits = 1)
+```
+
+** 2002, 2006, 2010 sd table for "Excellent" responses**
+```{r}
+prop_table_sd = filter(brfss, year == 2002 | year == 2006 | year == 2010) %>%
+  filter(locationabbr == "NY") %>%
+  filter(response == "Excellent") %>%
+  select(year, locationdesc, response, data_value) %>%
+  group_by(year) %>%
+  summarize(sd_excellent = sd(data_value)) %>% 
+  spread(key = year, value = sd_excellent) %>% 
+  knitr::kable(digits = 1)
+```
+
+** Five-panel plot for each response category over time **
+```{r five panel, warning = FALSE}
+five_panel = select(brfss, year, locationabbr, locationdesc, response, data_value) %>%
+  group_by(year, locationabbr, response) %>%
+  summarize(respon_mean = mean(data_value))
+ggplot(five_panel, aes(x = year, y = respon_mean, color = response)) +
+  geom_point() +
+  labs(
+    title = "Number of Observations in each state from 2002 to 2010",
+    x = "Year",
+    y = "Number of Observations",
+    caption = "Data from the p8105 package"
+  ) +
+  facet_grid(~response) +
+  viridis::scale_colour_viridis(
+    name = "response", 
+    discrete = TRUE
+  ) +
+  theme_set(theme_bw() + theme(legend.position = "bottom")) +
+  theme(axis.text.x = element_text(angle = 90))
+```
+The above 5-panel plot shows the average proportion in each response category, and the distribution of these state-level averages over time. 
+
