@@ -97,3 +97,9 @@ ggplot(five_panel, aes(x = year, y = respon_mean, color = response)) +
 ```
 The above 5-panel plot shows the average proportion in each response category, and the distribution of these state-level averages over time. 
 
+## Problem 2
+```{r instacart data}
+inscart = instacart
+summary(inscart)
+```
+The `instacart` dataset consist of `r nrow(inscart)` rows, and `r ncol(inscart)` columns. Each row in the dataset is a product from an order. The dataset provided detialed information from the customers' side such as user ID by `user_id`, and the hour of day on which the order was placed by `order_dow`. On the other side, the dataset also provided detialed information from the seller's side such as aisle ID by `aisle_id`, and the aisle name by `aisle`.
