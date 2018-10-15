@@ -103,3 +103,54 @@ inscart = instacart
 summary(inscart)
 ```
 The `instacart` dataset consist of `r nrow(inscart)` rows, and `r ncol(inscart)` columns. Each row in the dataset is a product from an order. The dataset provided detialed information from the customers' side such as user ID by `user_id`, and the hour of day on which the order was placed by `order_dow`. On the other side, the dataset also provided detialed information from the seller's side such as aisle ID by `aisle_id`, and the aisle name by `aisle`.
+
+How many aisles are there, and which aisles are the most items ordered from?
+Make a plot that shows the number of items ordered in each aisle. Order aisles sensibly, and organize your plot so others can read it.
+Make a table showing the most popular item aisles “baking ingredients”, “dog food care”, and “packaged vegetables fruits”
+Make a table showing the mean hour of the day at which Pink Lady Apples and Coffee Ice Cream are ordered on each day of the week; format this table for human readers (i.e. produce a 2 x 7 table).
+
+** Number of aisles **
+```{r}
+num_aisle = nrow(distinct(inscart, aisle_id))
+```
+The number of aisle is `r num_aisle`
+
+** items ordered in each aisle **
+```{r}
+num_item_aisle = inscart %>%
+  count(aisle) %>%
+  mutate(aisle = fct_reorder(aisle, desc(n)))
+ggplot(num_item_aisle, aes(x = aisle, y = n)) +
+    geom_point() +
+    theme(axis.text.x = element_text(angle = 90))
+```
+
+** Popular item aisles **
+```{r}
+popular_aisles = filter(inscart, aisle == "baking ingredients" | aisle == "dog food care" | aisle == "packaged vegetables fruits") %>%
+  group_by(aisle, product_name) %>%
+  count(product_name)
+popular_aisles_baking = filter(popular_aisles, aisle == "baking ingredients")
+most_popular_baking = popular_aisles_baking[which.max(popular_aisles_baking$n),2]
+popular_aisles_dog = filter(popular_aisles, aisle == "dog food care")
+most_popular_dog = popular_aisles_dog[which.max(popular_aisles_dog$n),2]
+popular_aisles_veggie = filter(popular_aisles, aisle == "packaged vegetables fruits")
+most_popular_veggie = popular_aisles_veggie[which.max(popular_aisles_veggie$n),2]
+popular_aisles = cbind.data.frame(most_popular_veggie, most_popular_dog, most_popular_baking)
+colnames(popular_aisles) = c("packaged vegetables fruits", "dog food care", "baking ingredients")
+knitr::kable(popular_aisles)
+```
+
+Above table shows the most popular item aisles in “baking ingredients”, “dog food care”, and “packaged vegetables fruits”
+
+** Pink Lady Apples and Coffee Ice Cream orders by day **
+```{r}
+mean_hour_apple_coffee = select(inscart, order_id, order_dow, order_hour_of_day, product_name) %>%
+  mutate(order_dow = factor(order_dow, labels = c("Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"))) %>%
+  filter(product_name == "Pink Lady Apples" | product_name == "Coffee Ice Cream") %>%
+  group_by(order_dow, product_name) %>%
+  janitor::clean_names() %>%
+  summarise(mean_order_hour = mean(order_hour_of_day)) %>%
+  spread(key = order_dow, value = mean_order_hour)
+knitr::kable(mean_hour_apple_coffee)  
+```
