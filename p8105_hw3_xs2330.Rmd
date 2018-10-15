@@ -154,3 +154,9 @@ mean_hour_apple_coffee = select(inscart, order_id, order_dow, order_hour_of_day,
   spread(key = order_dow, value = mean_order_hour)
 knitr::kable(mean_hour_apple_coffee)  
 ```
+
+## Problem 3
+```{r data original summary}
+skimr::skim(ny_noaa)
+```
+The ny noaa data were accessed from the NOAA National Climatic Data Center, consisting of `r nrow(ny_noaa)` rows and `r ncol(ny_noaa)`. Key variables include date by `date`, prcipitation by `prcp`, snowfall by `snow`, depth of snow by `snwd`, highest temparture by `tmax`, and lowest temparture by `tmin`. For `tmax` and `tmin`, `r mean(is.na(ny_noaa$tmax))` of the data is missing, which is a big problem if we are trying to calculate temparature related results because we cannot be sure whether the missing data would lead to a different result.
